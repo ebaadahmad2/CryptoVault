@@ -1,0 +1,802 @@
+<!doctype html>
+<html lang="en" class="h-full">
+ <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CryptoVault - Premium Crypto Wallet</title>
+  <script src="https://cdn.tailwindcss.com/3.4.17"></script>
+  <script src="/_sdk/element_sdk.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;600;700;800;900&amp;family=Inter:wght@300;400;500;600&amp;display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; }
+    
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+    }
+    
+    body {
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a0033 50%, #0a0a0a 100%);
+      color: white;
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+    }
+    
+    .font-orbitron { font-family: 'Orbitron', monospace; }
+    
+    /* Glassmorphism Card */
+    .glass-card {
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(0, 255, 136, 0.2);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+    }
+    
+    .glass-card-purple {
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      background: rgba(102, 0, 204, 0.1);
+      border: 1px solid rgba(102, 0, 204, 0.3);
+      box-shadow: 0 8px 32px rgba(102, 0, 204, 0.2);
+      border-radius: 24px;
+    }
+    
+    /* Neon Glow Effects */
+    .neon-green {
+      box-shadow: 0 0 20px rgba(0, 255, 136, 0.5), 0 0 40px rgba(0, 255, 136, 0.3), 0 0 60px rgba(0, 255, 136, 0.1);
+    }
+    
+    .neon-purple {
+      box-shadow: 0 0 20px rgba(102, 0, 204, 0.5), 0 0 40px rgba(102, 0, 204, 0.3);
+    }
+    
+    /* Gradient Button */
+    .btn-gradient {
+      background: linear-gradient(135deg, #00ff88 0%, #6600cc 100%);
+      border: none;
+      border-radius: 12px;
+      padding: 16px 32px;
+      font-weight: 600;
+      color: white;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .btn-gradient:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 0 30px rgba(0, 255, 136, 0.6), 0 0 60px rgba(102, 0, 204, 0.4);
+    }
+    
+    .btn-gradient::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+      transition: left 0.5s ease;
+    }
+    
+    .btn-gradient:hover::before {
+      left: 100%;
+    }
+    
+    /* Pulse Animation */
+    @keyframes pulse-green {
+      0%, 100% { box-shadow: 0 0 20px rgba(0, 255, 136, 0.5); }
+      50% { box-shadow: 0 0 40px rgba(0, 255, 136, 0.8), 0 0 60px rgba(0, 255, 136, 0.4); }
+    }
+    
+    .pulse-animation {
+      animation: pulse-green 2s ease-in-out infinite;
+    }
+    
+    /* Wallet Card Flip */
+    .wallet-card-container {
+      perspective: 1000px;
+      width: 320px;
+      height: 200px;
+    }
+    
+    .wallet-card {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      transform-style: preserve-3d;
+      animation: wallet-rotate 20s linear infinite;
+    }
+    
+    @keyframes wallet-rotate {
+      0% { transform: rotateY(0deg); }
+      100% { transform: rotateY(360deg); }
+    }
+    
+    .wallet-card:hover {
+      animation-play-state: paused;
+    }
+    
+    .wallet-front, .wallet-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      backface-visibility: hidden;
+      border-radius: 20px;
+      padding: 24px;
+      background: linear-gradient(135deg, #1a0033 0%, #6600cc 50%, #1a0033 100%);
+      border: 2px solid rgba(0, 255, 136, 0.3);
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+    }
+    
+    .wallet-back {
+      transform: rotateY(180deg);
+      background: linear-gradient(135deg, #0a0a0a 0%, #1a0033 100%);
+    }
+    
+    /* Floating Particles */
+    .particles {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      overflow: hidden;
+      z-index: 0;
+    }
+    
+    .particle {
+      position: absolute;
+      width: 4px;
+      height: 4px;
+      background: rgba(0, 255, 136, 0.6);
+      border-radius: 50%;
+      animation: float-particle 15s infinite linear;
+    }
+    
+    @keyframes float-particle {
+      0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+      10% { opacity: 1; }
+      90% { opacity: 1; }
+      100% { transform: translateY(-100vh) rotate(720deg); opacity: 0; }
+    }
+    
+    /* Scroll Animations */
+    .reveal {
+      opacity: 0;
+      transform: translateY(50px);
+      transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .reveal.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    
+    .reveal-left {
+      opacity: 0;
+      transform: translateX(-50px);
+      transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .reveal-left.active {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    
+    .reveal-right {
+      opacity: 0;
+      transform: translateX(50px);
+      transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    
+    .reveal-right.active {
+      opacity: 1;
+      transform: translateX(0);
+    }
+    
+    /* Transaction Item Animation */
+    .transaction-item {
+      transition: all 0.3s ease;
+    }
+    
+    .transaction-item:hover {
+      transform: translateX(10px);
+      background: rgba(0, 255, 136, 0.1);
+    }
+    
+    /* Security Badge Pulse */
+    @keyframes security-pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    
+    .security-badge {
+      animation: security-pulse 3s ease-in-out infinite;
+    }
+    
+    /* Gradient Text */
+    .gradient-text {
+      background: linear-gradient(135deg, #00ff88 0%, #6600cc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    
+    /* QR Code Glow */
+    .qr-glow {
+      box-shadow: 0 0 30px rgba(0, 255, 136, 0.3), inset 0 0 20px rgba(0, 255, 136, 0.1);
+    }
+    
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: #0a0a0a;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, #00ff88, #6600cc);
+      border-radius: 4px;
+    }
+    
+    /* Demo Banner */
+    .demo-banner {
+      background: linear-gradient(90deg, rgba(255, 193, 7, 0.2), rgba(255, 193, 7, 0.1));
+      border: 1px solid rgba(255, 193, 7, 0.5);
+      color: #ffc107;
+    }
+    
+    /* Main wrapper */
+    .main-wrapper {
+      min-height: 100%;
+      width: 100%;
+      position: relative;
+      overflow-y: auto;
+    }
+  </style>
+  <style>body { box-sizing: border-box; }</style>
+  <script src="/_sdk/data_sdk.js" type="text/javascript"></script>
+ </head>
+ <body class="h-full"><!-- Floating Particles Background -->
+  <div class="particles" id="particles"></div>
+  <div class="main-wrapper"><!-- Demo Banner -->
+   <div class="demo-banner text-center py-2 px-4 text-sm font-medium sticky top-0 z-50 backdrop-blur-md">
+    ⚠️ DEMO PROTOTYPE ONLY — No real cryptocurrency or funds. For demonstration purposes only.
+   </div><!-- Navigation -->
+   <nav class="relative z-10 px-6 py-4 flex items-center justify-between max-w-7xl mx-auto">
+    <div class="flex items-center gap-3">
+     <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-green-400 to-purple-600 flex items-center justify-center neon-green">
+      <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+      </svg>
+     </div><span class="font-orbitron text-xl font-bold gradient-text">CryptoVault</span>
+    </div>
+    <div class="hidden md:flex items-center gap-8 text-sm text-gray-400"><a href="#features" class="hover:text-white transition-colors">Features</a> <a href="#security" class="hover:text-white transition-colors">Security</a> <a href="#transactions" class="hover:text-white transition-colors">Activity</a>
+    </div><button class="btn-gradient text-sm py-3 px-6 font-orbitron pulse-animation" id="connect-btn"> Connect Wallet </button>
+   </nav><!-- Hero Section -->
+   <section class="relative z-10 px-6 py-16 md:py-24 max-w-7xl mx-auto">
+    <div class="grid md:grid-cols-2 gap-12 items-center">
+     <div class="space-y-8">
+      <div class="inline-flex items-center gap-2 glass-card px-4 py-2 text-sm text-green-400"><span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span> 2FA Verified • Bank-Grade Security
+      </div>
+      <h1 class="font-orbitron text-4xl md:text-6xl font-black leading-tight" id="hero-title">The Future of <span class="gradient-text"> Crypto Security</span></h1>
+      <p class="text-gray-400 text-lg leading-relaxed max-w-lg" id="hero-subtitle">Experience premium digital asset management with military-grade encryption and seamless multi-chain support.</p>
+      <div class="flex flex-wrap gap-4"><button class="btn-gradient font-orbitron text-lg py-4 px-8" id="cta-button"> Launch App </button> <button class="glass-card px-8 py-4 text-white font-medium hover:bg-white/10 transition-all"> Learn More </button>
+      </div>
+      <div class="flex items-center gap-6 pt-4">
+       <div class="flex -space-x-3">
+        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 border-2 border-black"></div>
+        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-cyan-500 border-2 border-black"></div>
+        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-green-500 to-emerald-500 border-2 border-black"></div>
+       </div>
+       <div class="text-sm"><span class="text-white font-semibold">2M+</span> <span class="text-gray-500"> users trust CryptoVault</span>
+       </div>
+      </div>
+     </div><!-- Animated Wallet Card -->
+     <div class="flex justify-center">
+      <div class="wallet-card-container">
+       <div class="wallet-card"><!-- Front of Card -->
+        <div class="wallet-front flex flex-col justify-between">
+         <div class="flex justify-between items-start">
+          <div class="font-orbitron text-xs text-gray-400 tracking-widest">
+           CRYPTOVAULT
+          </div>
+          <div class="flex gap-2">
+           <svg class="w-6 h-6 text-orange-500" viewbox="0 0 24 24" fill="currentColor"><path d="M23.638 14.904c-1.602 6.43-8.113 10.34-14.542 8.736C2.67 22.05-1.244 15.525.362 9.105 1.962 2.67 8.475-1.243 14.9.358c6.43 1.605 10.342 8.115 8.738 14.546z" />
+           </svg>
+           <svg class="w-6 h-6 text-blue-400" viewbox="0 0 24 24" fill="currentColor"><path d="M11.944 17.97L4.58 13.62 11.943 24l7.37-10.38-7.372 4.35h.003zM12.056 0L4.69 12.223l7.365 4.354 7.365-4.35L12.056 0z" />
+           </svg>
+          </div>
+         </div>
+         <div>
+          <div class="text-gray-400 text-xs mb-1">
+           Total Balance
+          </div>
+          <div class="font-orbitron text-2xl font-bold text-white">
+           $84,392.57
+          </div>
+          <div class="text-green-400 text-sm mt-1">
+           +12.4% ↑
+          </div>
+         </div>
+         <div class="flex justify-between items-end">
+          <div class="font-mono text-sm text-gray-400 tracking-wider">
+           •••• •••• •••• 4829
+          </div>
+          <div class="w-8 h-8 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center">
+           <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+           </svg>
+          </div>
+         </div>
+        </div><!-- Back of Card -->
+        <div class="wallet-back flex flex-col justify-between">
+         <div class="text-center">
+          <div class="font-orbitron text-xs text-gray-400 mb-4">
+           SCAN TO RECEIVE
+          </div>
+          <div class="w-24 h-24 mx-auto bg-white rounded-lg p-2 qr-glow">
+           <svg viewbox="0 0 100 100" class="w-full h-full"><rect x="10" y="10" width="20" height="20" fill="#1a0033" /> <rect x="70" y="10" width="20" height="20" fill="#1a0033" /> <rect x="10" y="70" width="20" height="20" fill="#1a0033" /> <rect x="40" y="10" width="10" height="10" fill="#1a0033" /> <rect x="40" y="30" width="10" height="10" fill="#1a0033" /> <rect x="50" y="40" width="10" height="10" fill="#1a0033" /> <rect x="60" y="50" width="10" height="10" fill="#1a0033" /> <rect x="40" y="60" width="10" height="10" fill="#1a0033" /> <rect x="70" y="70" width="10" height="10" fill="#1a0033" /> <rect x="80" y="50" width="10" height="10" fill="#1a0033" /> <rect x="15" y="15" width="10" height="10" fill="white" /> <rect x="75" y="15" width="10" height="10" fill="white" /> <rect x="15" y="75" width="10" height="10" fill="white" />
+           </svg>
+          </div>
+         </div>
+         <div class="flex justify-center gap-4">
+          <div class="text-center">
+           <div class="text-xs text-gray-500">
+            ETH
+           </div>
+           <div class="text-sm font-semibold text-white">
+            12.847
+           </div>
+          </div>
+          <div class="w-px bg-gray-700"></div>
+          <div class="text-center">
+           <div class="text-xs text-gray-500">
+            BTC
+           </div>
+           <div class="text-sm font-semibold text-white">
+            0.9421
+           </div>
+          </div>
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div>
+   </section><!-- Features Section -->
+   <section id="features" class="relative z-10 px-6 py-20 max-w-7xl mx-auto">
+    <div class="text-center mb-16 reveal">
+     <h2 class="font-orbitron text-3xl md:text-4xl font-bold mb-4" id="features-title">Premium <span class="gradient-text">Features</span></h2>
+     <p class="text-gray-400 max-w-2xl mx-auto">Everything you need for secure digital asset management</p>
+    </div>
+    <div class="grid md:grid-cols-3 gap-8">
+     <div class="glass-card p-8 reveal" style="transition-delay: 0.1s;">
+      <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-400/20 to-green-600/20 flex items-center justify-center mb-6 neon-green">
+       <svg class="w-7 h-7 text-green-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+       </svg>
+      </div>
+      <h3 class="font-orbitron text-xl font-bold mb-3">Military-Grade Security</h3>
+      <p class="text-gray-400 text-sm leading-relaxed">256-bit AES encryption with hardware security module integration and biometric authentication.</p>
+     </div>
+     <div class="glass-card-purple p-8 reveal" style="transition-delay: 0.2s;">
+      <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-purple-400/20 to-purple-600/20 flex items-center justify-center mb-6 neon-purple">
+       <svg class="w-7 h-7 text-purple-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+       </svg>
+      </div>
+      <h3 class="font-orbitron text-xl font-bold mb-3">Lightning Fast</h3>
+      <p class="text-gray-400 text-sm leading-relaxed">Sub-second transaction processing with optimized gas fees and multi-chain bridge support.</p>
+     </div>
+     <div class="glass-card p-8 reveal" style="transition-delay: 0.3s;">
+      <div class="w-14 h-14 rounded-2xl bg-gradient-to-br from-green-400/20 to-purple-600/20 flex items-center justify-center mb-6">
+       <svg class="w-7 h-7 text-green-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064" />
+       </svg>
+      </div>
+      <h3 class="font-orbitron text-xl font-bold mb-3">Multi-Chain Support</h3>
+      <p class="text-gray-400 text-sm leading-relaxed">Seamlessly manage assets across Ethereum, BSC, Polygon, Solana, and 50+ networks.</p>
+     </div>
+    </div>
+   </section><!-- Security Badges Section -->
+   <section id="security" class="relative z-10 px-6 py-16 max-w-7xl mx-auto">
+    <div class="glass-card p-8 md:p-12 reveal">
+     <div class="flex flex-col md:flex-row items-center justify-between gap-8">
+      <div class="text-center md:text-left">
+       <h3 class="font-orbitron text-2xl font-bold mb-2">Enterprise-Grade Protection</h3>
+       <p class="text-gray-400">Trusted by institutions worldwide</p>
+      </div>
+      <div class="flex flex-wrap justify-center gap-6">
+       <div class="flex items-center gap-3 glass-card px-6 py-4 security-badge">
+        <svg class="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+        </svg>
+        <div>
+         <div class="font-orbitron text-sm font-bold text-green-400">
+          2FA
+         </div>
+         <div class="text-xs text-gray-400">
+          Verified
+         </div>
+        </div>
+       </div>
+       <div class="flex items-center gap-3 glass-card px-6 py-4 security-badge" style="animation-delay: 0.5s;">
+        <svg class="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+        </svg>
+        <div>
+         <div class="font-orbitron text-sm font-bold text-purple-400">
+          SOC 2
+         </div>
+         <div class="text-xs text-gray-400">
+          Compliant
+         </div>
+        </div>
+       </div>
+       <div class="flex items-center gap-3 glass-card px-6 py-4 security-badge" style="animation-delay: 1s;">
+        <svg class="w-8 h-8 text-green-400" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <div>
+         <div class="font-orbitron text-sm font-bold text-green-400">
+          Audited
+         </div>
+         <div class="text-xs text-gray-400">
+          By CertiK
+         </div>
+        </div>
+       </div>
+      </div>
+     </div>
+    </div>
+   </section><!-- Transaction History Section -->
+   <section id="transactions" class="relative z-10 px-6 py-20 max-w-7xl mx-auto">
+    <div class="grid md:grid-cols-2 gap-12 items-start">
+     <div class="reveal-left">
+      <h2 class="font-orbitron text-3xl font-bold mb-4">Recent <span class="gradient-text">Activity</span></h2>
+      <p class="text-gray-400 mb-8">Real-time transaction tracking with detailed analytics</p>
+      <div class="glass-card p-6 space-y-4">
+       <div class="transaction-item flex items-center justify-between p-4 rounded-xl cursor-pointer">
+        <div class="flex items-center gap-4">
+         <div class="w-12 h-12 rounded-full bg-gradient-to-br from-orange-400 to-orange-600 flex items-center justify-center">
+          <svg class="w-6 h-6 text-white" viewbox="0 0 24 24" fill="currentColor"><path d="M23.638 14.904c-1.602 6.43-8.113 10.34-14.542 8.736C2.67 22.05-1.244 15.525.362 9.105 1.962 2.67 8.475-1.243 14.9.358c6.43 1.605 10.342 8.115 8.738 14.546z" />
+          </svg>
+         </div>
+         <div>
+          <div class="font-semibold text-white">
+           Received BTC
+          </div>
+          <div class="text-sm text-gray-400">
+           From: 0x8a7...3f2d
+          </div>
+         </div>
+        </div>
+        <div class="text-right">
+         <div class="font-orbitron text-green-400">
+          +0.0842 BTC
+         </div>
+         <div class="text-xs text-gray-500">
+          2 min ago
+         </div>
+        </div>
+       </div>
+       <div class="transaction-item flex items-center justify-between p-4 rounded-xl cursor-pointer">
+        <div class="flex items-center gap-4">
+         <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-indigo-600 flex items-center justify-center">
+          <svg class="w-6 h-6 text-white" viewbox="0 0 24 24" fill="currentColor"><path d="M11.944 17.97L4.58 13.62 11.943 24l7.37-10.38-7.372 4.35h.003zM12.056 0L4.69 12.223l7.365 4.354 7.365-4.35L12.056 0z" />
+          </svg>
+         </div>
+         <div>
+          <div class="font-semibold text-white">
+           Sent ETH
+          </div>
+          <div class="text-sm text-gray-400">
+           To: 0x2b4...9e1c
+          </div>
+         </div>
+        </div>
+        <div class="text-right">
+         <div class="font-orbitron text-red-400">
+          -2.5 ETH
+         </div>
+         <div class="text-xs text-gray-500">
+          15 min ago
+         </div>
+        </div>
+       </div>
+       <div class="transaction-item flex items-center justify-between p-4 rounded-xl cursor-pointer">
+        <div class="flex items-center gap-4">
+         <div class="w-12 h-12 rounded-full bg-gradient-to-br from-purple-400 to-purple-600 flex items-center justify-center">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4" />
+          </svg>
+         </div>
+         <div>
+          <div class="font-semibold text-white">
+           Swap Complete
+          </div>
+          <div class="text-sm text-gray-400">
+           USDC → ETH
+          </div>
+         </div>
+        </div>
+        <div class="text-right">
+         <div class="font-orbitron text-purple-400">
+          +1.2 ETH
+         </div>
+         <div class="text-xs text-gray-500">
+          1 hour ago
+         </div>
+        </div>
+       </div>
+       <div class="transaction-item flex items-center justify-between p-4 rounded-xl cursor-pointer">
+        <div class="flex items-center gap-4">
+         <div class="w-12 h-12 rounded-full bg-gradient-to-br from-green-400 to-emerald-600 flex items-center justify-center">
+          <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+         </div>
+         <div>
+          <div class="font-semibold text-white">
+           Staking Reward
+          </div>
+          <div class="text-sm text-gray-400">
+           Daily yield
+          </div>
+         </div>
+        </div>
+        <div class="text-right">
+         <div class="font-orbitron text-green-400">
+          +0.024 ETH
+         </div>
+         <div class="text-xs text-gray-500">
+          3 hours ago
+         </div>
+        </div>
+       </div>
+      </div>
+     </div><!-- QR Scanner Card -->
+     <div class="reveal-right">
+      <div class="glass-card-purple p-8 text-center">
+       <h3 class="font-orbitron text-xl font-bold mb-6">Instant Receive</h3>
+       <div class="w-48 h-48 mx-auto bg-white rounded-2xl p-4 qr-glow mb-6">
+        <svg viewbox="0 0 100 100" class="w-full h-full"><rect x="5" y="5" width="25" height="25" fill="none" stroke="#1a0033" stroke-width="3" /> <rect x="10" y="10" width="15" height="15" fill="#1a0033" /> <rect x="70" y="5" width="25" height="25" fill="none" stroke="#1a0033" stroke-width="3" /> <rect x="75" y="10" width="15" height="15" fill="#1a0033" /> <rect x="5" y="70" width="25" height="25" fill="none" stroke="#1a0033" stroke-width="3" /> <rect x="10" y="75" width="15" height="15" fill="#1a0033" /> <rect x="35" y="5" width="5" height="5" fill="#1a0033" /> <rect x="45" y="5" width="5" height="5" fill="#1a0033" /> <rect x="55" y="5" width="5" height="5" fill="#1a0033" /> <rect x="35" y="15" width="5" height="5" fill="#1a0033" /> <rect x="50" y="20" width="5" height="5" fill="#1a0033" /> <rect x="35" y="35" width="5" height="5" fill="#1a0033" /> <rect x="45" y="35" width="5" height="5" fill="#1a0033" /> <rect x="55" y="35" width="5" height="5" fill="#1a0033" /> <rect x="65" y="35" width="5" height="5" fill="#1a0033" /> <rect x="5" y="40" width="5" height="5" fill="#1a0033" /> <rect x="20" y="45" width="5" height="5" fill="#1a0033" /> <rect x="35" y="50" width="5" height="5" fill="#1a0033" /> <rect x="50" y="45" width="5" height="5" fill="#1a0033" /> <rect x="65" y="50" width="5" height="5" fill="#1a0033" /> <rect x="5" y="55" width="5" height="5" fill="#1a0033" /> <rect x="20" y="60" width="5" height="5" fill="#1a0033" /> <rect x="40" y="60" width="5" height="5" fill="#1a0033" /> <rect x="55" y="65" width="5" height="5" fill="#1a0033" /> <rect x="70" y="70" width="10" height="10" fill="#1a0033" /> <rect x="85" y="70" width="10" height="10" fill="#1a0033" /> <rect x="70" y="85" width="10" height="10" fill="#1a0033" /> <rect x="85" y="85" width="10" height="10" fill="#1a0033" />
+        </svg>
+       </div>
+       <p class="text-gray-400 text-sm mb-6">Scan this QR code to receive crypto instantly</p>
+       <div class="flex justify-center gap-4"><button class="btn-gradient py-3 px-6 text-sm font-orbitron"> Copy Address </button> <button class="glass-card px-6 py-3 text-sm hover:bg-white/10 transition-all"> Share </button>
+       </div>
+       <div class="mt-6 p-4 rounded-xl bg-black/30 border border-gray-800">
+        <div class="text-xs text-gray-500 mb-1">
+         Wallet Address
+        </div>
+        <div class="font-mono text-sm text-gray-300 break-all">
+         0x8a7Bf3E2c1D9F4a6B8e2C1D9F4a6B8e2C1D9F4a6
+        </div>
+       </div>
+      </div>
+     </div>
+    </div>
+   </section><!-- Footer CTA -->
+   <section class="relative z-10 px-6 py-20 max-w-7xl mx-auto">
+    <div class="glass-card p-12 text-center reveal">
+     <h2 class="font-orbitron text-3xl md:text-4xl font-bold mb-4">Ready to Get Started?</h2>
+     <p class="text-gray-400 mb-8 max-w-xl mx-auto">Join millions of users securing their digital assets with CryptoVault</p><button class="btn-gradient font-orbitron text-lg py-4 px-12 pulse-animation" id="footer-cta-button"> Launch App </button>
+    </div>
+   </section><!-- Footer -->
+   <footer class="relative z-10 px-6 py-8 border-t border-gray-800/50">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
+     <div class="flex items-center gap-3">
+      <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-green-400 to-purple-600 flex items-center justify-center">
+       <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewbox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+       </svg>
+      </div><span class="font-orbitron text-sm gradient-text">CryptoVault</span>
+     </div>
+     <div class="text-gray-500 text-sm text-center">
+      © 2024 CryptoVault. Demo prototype only — not for real transactions.
+     </div>
+     <div class="flex gap-4"><a href="#" class="text-gray-400 hover:text-white transition-colors">
+       <svg class="w-5 h-5" fill="currentColor" viewbox="0 0 24 24">
+        <path d="M24 4.557c-.883.392-1.832.656-2.828.775 1.017-.609 1.798-1.574 2.165-2.724-.951.564-2.005.974-3.127 1.195-.897-.957-2.178-1.555-3.594-1.555-3.179 0-5.515 2.966-4.797 6.045-4.091-.205-7.719-2.165-10.148-5.144-1.29 2.213-.669 5.108 1.523 6.574-.806-.026-1.566-.247-2.229-.616-.054 2.281 1.581 4.415 3.949 4.89-.693.188-1.452.232-2.224.084.626 1.956 2.444 3.379 4.6 3.419-2.07 1.623-4.678 2.348-7.29 2.04 2.179 1.397 4.768 2.212 7.548 2.212 9.142 0 14.307-7.721 13.995-14.646.962-.695 1.797-1.562 2.457-2.549z" />
+       </svg></a> <a href="#" class="text-gray-400 hover:text-white transition-colors">
+       <svg class="w-5 h-5" fill="currentColor" viewbox="0 0 24 24">
+        <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0112 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z" />
+       </svg></a> <a href="#" class="text-gray-400 hover:text-white transition-colors">
+       <svg class="w-5 h-5" fill="currentColor" viewbox="0 0 24 24">
+        <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+       </svg></a>
+     </div>
+    </div>
+   </footer>
+  </div>
+  <script>
+    // Default configuration
+    const defaultConfig = {
+      hero_title: 'The Future of Crypto Security',
+      hero_subtitle: 'Experience premium digital asset management with military-grade encryption and seamless multi-chain support.',
+      features_title: 'Premium Features',
+      cta_button_text: 'Launch App',
+      background_color: '#0a0a0a',
+      surface_color: 'rgba(255, 255, 255, 0.05)',
+      text_color: '#ffffff',
+      primary_action_color: '#00ff88',
+      secondary_action_color: '#6600cc'
+    };
+
+    // Create floating particles
+    function createParticles() {
+      const particlesContainer = document.getElementById('particles');
+      const particleCount = 30;
+      
+      for (let i = 0; i < particleCount; i++) {
+        const particle = document.createElement('div');
+        particle.className = 'particle';
+        particle.style.left = Math.random() * 100 + '%';
+        particle.style.animationDelay = Math.random() * 15 + 's';
+        particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+        
+        if (Math.random() > 0.5) {
+          particle.style.background = 'rgba(102, 0, 204, 0.6)';
+        }
+        
+        particlesContainer.appendChild(particle);
+      }
+    }
+
+    // Scroll reveal animation using IntersectionObserver
+    function initScrollAnimations() {
+      const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('active');
+          }
+        });
+      }, {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+      });
+
+      document.querySelectorAll('.reveal, .reveal-left, .reveal-right').forEach(el => {
+        observer.observe(el);
+      });
+    }
+
+    // Config change handler
+    async function onConfigChange(config) {
+      const heroTitle = document.getElementById('hero-title');
+      const heroSubtitle = document.getElementById('hero-subtitle');
+      const featuresTitle = document.getElementById('features-title');
+      const ctaButton = document.getElementById('cta-button');
+      const footerCtaButton = document.getElementById('footer-cta-button');
+
+      // Update hero title
+      if (heroTitle) {
+        const titleText = config.hero_title || defaultConfig.hero_title;
+        heroTitle.innerHTML = titleText.includes('Crypto') 
+          ? titleText.replace('Crypto', '<span class="gradient-text">Crypto</span>')
+          : titleText;
+      }
+
+      // Update hero subtitle
+      if (heroSubtitle) {
+        heroSubtitle.textContent = config.hero_subtitle || defaultConfig.hero_subtitle;
+      }
+
+      // Update features title
+      if (featuresTitle) {
+        const featTitle = config.features_title || defaultConfig.features_title;
+        featuresTitle.innerHTML = featTitle.includes('Features')
+          ? featTitle.replace('Features', '<span class="gradient-text">Features</span>')
+          : featTitle;
+      }
+
+      // Update CTA buttons
+      const ctaText = config.cta_button_text || defaultConfig.cta_button_text;
+      if (ctaButton) ctaButton.textContent = ctaText;
+      if (footerCtaButton) footerCtaButton.textContent = ctaText;
+
+      // Apply colors
+      const bgColor = config.background_color || defaultConfig.background_color;
+      const textColor = config.text_color || defaultConfig.text_color;
+      const primaryColor = config.primary_action_color || defaultConfig.primary_action_color;
+      const secondaryColor = config.secondary_action_color || defaultConfig.secondary_action_color;
+
+      document.body.style.background = `linear-gradient(135deg, ${bgColor} 0%, #1a0033 50%, ${bgColor} 100%)`;
+      document.body.style.color = textColor;
+
+      // Update button gradients
+      document.querySelectorAll('.btn-gradient').forEach(btn => {
+        btn.style.background = `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`;
+      });
+
+      // Update gradient text elements
+      document.querySelectorAll('.gradient-text').forEach(el => {
+        el.style.background = `linear-gradient(135deg, ${primaryColor} 0%, ${secondaryColor} 100%)`;
+        el.style.webkitBackgroundClip = 'text';
+        el.style.webkitTextFillColor = 'transparent';
+        el.style.backgroundClip = 'text';
+      });
+    }
+
+    // Map to capabilities for color/font editing
+    function mapToCapabilities(config) {
+      return {
+        recolorables: [
+          {
+            get: () => config.background_color || defaultConfig.background_color,
+            set: (value) => {
+              config.background_color = value;
+              window.elementSdk.setConfig({ background_color: value });
+            }
+          },
+          {
+            get: () => config.surface_color || defaultConfig.surface_color,
+            set: (value) => {
+              config.surface_color = value;
+              window.elementSdk.setConfig({ surface_color: value });
+            }
+          },
+          {
+            get: () => config.text_color || defaultConfig.text_color,
+            set: (value) => {
+              config.text_color = value;
+              window.elementSdk.setConfig({ text_color: value });
+            }
+          },
+          {
+            get: () => config.primary_action_color || defaultConfig.primary_action_color,
+            set: (value) => {
+              config.primary_action_color = value;
+              window.elementSdk.setConfig({ primary_action_color: value });
+            }
+          },
+          {
+            get: () => config.secondary_action_color || defaultConfig.secondary_action_color,
+            set: (value) => {
+              config.secondary_action_color = value;
+              window.elementSdk.setConfig({ secondary_action_color: value });
+            }
+          }
+        ],
+        borderables: [],
+        fontEditable: undefined,
+        fontSizeable: undefined
+      };
+    }
+
+    // Map config values to edit panel
+    function mapToEditPanelValues(config) {
+      return new Map([
+        ['hero_title', config.hero_title || defaultConfig.hero_title],
+        ['hero_subtitle', config.hero_subtitle || defaultConfig.hero_subtitle],
+        ['features_title', config.features_title || defaultConfig.features_title],
+        ['cta_button_text', config.cta_button_text || defaultConfig.cta_button_text]
+      ]);
+    }
+
+    // Initialize SDK
+    if (window.elementSdk) {
+      window.elementSdk.init({
+        defaultConfig,
+        onConfigChange,
+        mapToCapabilities,
+        mapToEditPanelValues
+      });
+    }
+
+    // Initialize animations on load
+    createParticles();
+    initScrollAnimations();
+
+    // Connect wallet button interaction
+    document.getElementById('connect-btn').addEventListener('click', function() {
+      this.textContent = 'Connecting...';
+      setTimeout(() => {
+        this.textContent = 'Connected ✓';
+        this.classList.remove('pulse-animation');
+        this.style.background = 'linear-gradient(135deg, #00cc6a 0%, #009944 100%)';
+      }, 1500);
+    });
+  </script>
+ <script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'9cfe8dbd4038f83b',t:'MTc3MTQyODUwMC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
